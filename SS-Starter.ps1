@@ -4,14 +4,15 @@
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 Clear-Host
-Write-Host "======================================================================" -ForegroundColor Cyan
-Write-Host "                    CONSOLIDATED FORENSIC SUITE                      " -ForegroundColor Cyan
-Write-Host "======================================================================" -ForegroundColor Cyan
-Write-Host " Compiled & Integrated into 1 Script by: ranush                      " -ForegroundColor White
-Write-Host " Core Component Credits:                                             " -ForegroundColor DarkGray
-Write-Host "   - Engine 1 Mod Strings Tracker: HadronCollision                   " -ForegroundColor DarkGray
-Write-Host "   - Engine 2 Active Environment Audit: lily                         " -ForegroundColor DarkGray
-Write-Host "   - Engine 3 Doomsday USN Radar: Zedoon                             " -ForegroundColor DarkGray
+Write-Host "===================================================================" -ForegroundColor Cyan
+Write-Host "                    SS STARTER                                     " -ForegroundColor Cyan
+Write-Host "===================================================================" -ForegroundColor Cyan
+Write-Host " Compiled & Integrated into 1 Script by: ranush                    " -ForegroundColor White
+Write-Host " Credits:                                                          " -ForegroundColor DarkGray
+Write-Host "   - ModAnalyzer: HadronCollision                                  " -ForegroundColor DarkGray
+Write-Host "   - Services + CommonDirectories: praiselily                      " -ForegroundColor DarkGray
+Write-Host "   - Engine 3 Doomsday Checker: Zedoon                             " -ForegroundColor DarkGray
+Write-Host "   - Tools Downloader + The script I Integrated: JavaXYZZ          " -ForegroundColor DarkGray
 Write-Host "======================================================================" -ForegroundColor Cyan
 Write-Host
 
