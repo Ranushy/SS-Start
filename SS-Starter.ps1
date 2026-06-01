@@ -346,11 +346,33 @@ Write-Host "`n==================================================" -ForegroundCol
 Write-Host "     ENGINE 4: DEEP STRINGS EXTRACTOR SEARCH      " -ForegroundColor Green
 Write-Host "==================================================" -ForegroundColor Cyan
 
-$mods = "$env:USERPROFILE\AppData\Roaming\.minecraft\mods"
+# 1. Define the standard default path as a fallback target
+$defaultModsPath = "$env:USERPROFILE\AppData\Roaming\.minecraft\mods"
+
+Write-Host " [!] Default Target Path: $defaultModsPath" -ForegroundColor Gray
+Write-Host " [*] Press ENTER to use the default path, or PASTE a custom instance path below:" -ForegroundColor Yellow
+$customPath = Read-Host " >>> Target Mods Path"
+
+# 2. Process path selection and strip potential drag-and-drop quotes
+if ([string]::IsNullOrWhiteSpace($customPath)) {
+    $mods = $defaultModsPath
+} else {
+    $mods = $customPath.Trim().Trim('"').Trim("'")
+}
+
+# 3. Enforce the manual confirmation pause before running the scanner mechanics
+Write-Host "`n [*] Ready to target: $mods" -ForegroundColor Cyan
+Write-Host " [*] Press ANY KEY to initiate bytecode unpack and string scanning loops..." -ForegroundColor Yellow
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+Write-Host "======================================================================" -ForegroundColor Cyan
+
 if (-not (Test-Path $mods -PathType Container)) {
-    Write-Host "[-] Standard mod directory path not found. Skipping file extraction arrays..." -ForegroundColor Gray
+    Write-Host " [✗] Error: Target directory does not exist or is inaccessible: $mods" -ForegroundColor Red
+    Write-Host " [-] Skipping file extraction arrays..." -ForegroundColor Gray
 } else {
     Write-Host "[+] Targeting Mod Directory Path: $mods" -ForegroundColor Green
+    
+    # Isolate active runtime JVM configurations
     $javaProcess = Get-Process javaw -ErrorAction SilentlyContinue
     if (-not $javaProcess) { $javaProcess = Get-Process java -ErrorAction SilentlyContinue }
     if ($javaProcess) {
@@ -361,13 +383,16 @@ if (-not (Test-Path $mods -PathType Container)) {
         } catch {}
     }
 
+    # Core algorithmic signature validation and metadata lookups
     function Get-SHA1 { param([string]$filePath) return (Get-FileHash -Path $filePath -Algorithm SHA1).Hash }
+    
     function Get-ZoneIdentifier {
         param([string]$filePath)
         $ads = Get-Content -Raw -Stream Zone.Identifier $filePath -ErrorAction SilentlyContinue
         if ($ads -match "HostUrl=(.+)") { return $matches[1] }
         return $null
     }
+    
     function Fetch-Modrinth {
         param([string]$hash)
         try {
@@ -379,6 +404,7 @@ if (-not (Test-Path $mods -PathType Container)) {
         } catch {}
         return @{ Name = ""; Slug = "" }
     }
+    
     function Fetch-Megabase {
         param([string]$hash)
         try {
@@ -388,6 +414,7 @@ if (-not (Test-Path $mods -PathType Container)) {
         return $null
     }
 
+    # Target signature definitions matching common modifications
     $cheatStrings = @(
         "AimAssist", "AnchorTweaks", "AutoAnchor", "AutoCrystal", "AutoDoubleHand", "AutoHitCrystal", 
         "AutoPot", "AutoTotem", "AutoArmor", "InventoryTotem", "Hitboxes", "JumpReset", "LegitTotem", 
@@ -436,6 +463,7 @@ if (-not (Test-Path $mods -PathType Container)) {
             $unknownMods += [PSCustomObject]@{ FileName = $file.Name; FilePath = $file.FullName; ZoneId = $zoneId }
         }
 
+        # 4. Bytecode unpacking pipeline for custom/unknown jars
         if ($unknownMods.Count -gt 0) {
             $tempDir = Join-Path $env:TEMP "habibimodanalyzer"
             $counter = 0
@@ -479,6 +507,7 @@ if (-not (Test-Path $mods -PathType Container)) {
             }
         }
 
+        # 5. Output UI Rendering
         Write-Host "`r$(' ' * 80)`r" -NoNewline
         if ($verifiedMods.Count -gt 0) {
             Write-Host "{ Safe Database Verified Modules }" -ForegroundColor Green
@@ -504,7 +533,6 @@ if (-not (Test-Path $mods -PathType Container)) {
         }
     } else { Write-Host "[-] Archive targets absent inside tracking directory.`n" -ForegroundColor Gray }
 }
-
 # ----------------------------------------------------------------
 # ENGINE 5: NON-MICROSOFT EXECUTABLE DETECTION ARCHIVE
 # ----------------------------------------------------------------
