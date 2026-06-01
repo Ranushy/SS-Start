@@ -4,15 +4,14 @@
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 Clear-Host
-Write-Host "===================================================================" -ForegroundColor Cyan
-Write-Host "                    SS STARTER                                     " -ForegroundColor Cyan
-Write-Host "===================================================================" -ForegroundColor Cyan
-Write-Host " Compiled & Integrated into 1 Script by: ranush                    " -ForegroundColor White
-Write-Host " Credits:                                                          " -ForegroundColor DarkGray
-Write-Host "   - ModAnalyzer: HadronCollision                                  " -ForegroundColor DarkGray
-Write-Host "   - Services + CommonDirectories: praiselily                      " -ForegroundColor DarkGray
-Write-Host "   - Doomsday Checker: Zedoon                                      " -ForegroundColor DarkGray
-Write-Host "   - Tools Downloader + The script I Integrated: JavaXYZZ          " -ForegroundColor DarkGray
+Write-Host "======================================================================" -ForegroundColor Cyan
+Write-Host "                    CONSOLIDATED FORENSIC SUITE                      " -ForegroundColor Cyan
+Write-Host "======================================================================" -ForegroundColor Cyan
+Write-Host " Compiled & Integrated into 1 Script by: ranush                      " -ForegroundColor White
+Write-Host " Core Component Credits:                                             " -ForegroundColor DarkGray
+Write-Host "   - Engine 1 Mod Strings Tracker: HadronCollision                   " -ForegroundColor DarkGray
+Write-Host "   - Engine 2 Active Environment Audit: lily                         " -ForegroundColor DarkGray
+Write-Host "   - Engine 3 Doomsday USN Radar: Zedoon                             " -ForegroundColor DarkGray
 Write-Host "======================================================================" -ForegroundColor Cyan
 Write-Host
 
@@ -101,17 +100,26 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 Write-Host "=== ASSET ACQUISITION PIPELINE ===" -ForegroundColor Cyan
 foreach (`$url in `$urls) {
     `$fileName = Split-Path `$url -Leaf
+    if ([string]::IsNullOrWhiteSpace(`$fileName) -or `$url -match '/DPS-Analyzer`__content_amp_rsquo__;) { `$fileName = "DPS-Analyzer-Repo" }
     `$dest = Join-Path "$folder" `$fileName
+    
     try {
         Invoke-WebRequest -Uri `$url -OutFile `$dest -UseBasicParsing -ErrorAction Stop
         Write-Host "[✓] Fetched: `$fileName" -ForegroundColor Green
+        
         if (`$fileName.ToLower().EndsWith(".zip")) {
-            `$outDir = Join-Path "$folder" ([IO.Path]::GetFileNameWithoutExtension(`$fileName))
-            New-Item -ItemType Directory -Path `$outDir -Force | Out-Null
-            [System.IO.Compression.ZipFile]::ExtractToDirectory(`$dest, `$outDir, `$true)
-            Remove-Item `$dest -Force
+            try {
+                `$outDir = Join-Path "$folder" ([IO.Path]::GetFileNameWithoutExtension(`$fileName))
+                New-Item -ItemType Directory -Path `$outDir -Force | Out-Null
+                [System.IO.Compression.ZipFile]::ExtractToDirectory(`$dest, `$outDir, `$true)
+                Remove-Item `$dest -Force
+            } catch {
+                Write-Host "    [!] Unpack Failed on extraction loop: `$fileName" -ForegroundColor Yellow
+            }
         }
-    } catch { Write-Host "[✗] Error: `$fileName" -ForegroundColor Red }
+    } catch { 
+        Write-Host "[✗] Error Downloading: `$fileName" -ForegroundColor Red 
+    }
 }
 Start-Process explorer.exe "$folder"
 Write-Host "`n[✓] Toolkit Assets Staged Successfully." -ForegroundColor Green
@@ -346,21 +354,21 @@ Write-Host "`n==================================================" -ForegroundCol
 Write-Host "     ENGINE 4: DEEP STRINGS EXTRACTOR SEARCH      " -ForegroundColor Green
 Write-Host "==================================================" -ForegroundColor Cyan
 
-# 1. Define the standard default path as a fallback target
+# Define standard folder path fallback
 $defaultModsPath = "$env:USERPROFILE\AppData\Roaming\.minecraft\mods"
 
 Write-Host " [!] Default Target Path: $defaultModsPath" -ForegroundColor Gray
 Write-Host " [*] Press ENTER to use the default path, or PASTE a custom instance path below:" -ForegroundColor Yellow
 $customPath = Read-Host " >>> Target Mods Path"
 
-# 2. Process path selection and strip potential drag-and-drop quotes
+# Process input choice and clean up trailing quotes from shell drag-and-drops
 if ([string]::IsNullOrWhiteSpace($customPath)) {
     $mods = $defaultModsPath
 } else {
     $mods = $customPath.Trim().Trim('"').Trim("'")
 }
 
-# 3. Enforce the manual confirmation pause before running the scanner mechanics
+# Controlled wait mechanism to prevent bypasses on active screen instances
 Write-Host "`n [*] Ready to target: $mods" -ForegroundColor Cyan
 Write-Host " [*] Press ANY KEY to initiate bytecode unpack and string scanning loops..." -ForegroundColor Yellow
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
@@ -371,8 +379,6 @@ if (-not (Test-Path $mods -PathType Container)) {
     Write-Host " [-] Skipping file extraction arrays..." -ForegroundColor Gray
 } else {
     Write-Host "[+] Targeting Mod Directory Path: $mods" -ForegroundColor Green
-    
-    # Isolate active runtime JVM configurations
     $javaProcess = Get-Process javaw -ErrorAction SilentlyContinue
     if (-not $javaProcess) { $javaProcess = Get-Process java -ErrorAction SilentlyContinue }
     if ($javaProcess) {
@@ -383,16 +389,13 @@ if (-not (Test-Path $mods -PathType Container)) {
         } catch {}
     }
 
-    # Core algorithmic signature validation and metadata lookups
     function Get-SHA1 { param([string]$filePath) return (Get-FileHash -Path $filePath -Algorithm SHA1).Hash }
-    
     function Get-ZoneIdentifier {
         param([string]$filePath)
         $ads = Get-Content -Raw -Stream Zone.Identifier $filePath -ErrorAction SilentlyContinue
         if ($ads -match "HostUrl=(.+)") { return $matches[1] }
         return $null
     }
-    
     function Fetch-Modrinth {
         param([string]$hash)
         try {
@@ -404,7 +407,6 @@ if (-not (Test-Path $mods -PathType Container)) {
         } catch {}
         return @{ Name = ""; Slug = "" }
     }
-    
     function Fetch-Megabase {
         param([string]$hash)
         try {
@@ -414,7 +416,6 @@ if (-not (Test-Path $mods -PathType Container)) {
         return $null
     }
 
-    # Target signature definitions matching common modifications
     $cheatStrings = @(
         "AimAssist", "AnchorTweaks", "AutoAnchor", "AutoCrystal", "AutoDoubleHand", "AutoHitCrystal", 
         "AutoPot", "AutoTotem", "AutoArmor", "InventoryTotem", "Hitboxes", "JumpReset", "LegitTotem", 
@@ -463,7 +464,6 @@ if (-not (Test-Path $mods -PathType Container)) {
             $unknownMods += [PSCustomObject]@{ FileName = $file.Name; FilePath = $file.FullName; ZoneId = $zoneId }
         }
 
-        # 4. Bytecode unpacking pipeline for custom/unknown jars
         if ($unknownMods.Count -gt 0) {
             $tempDir = Join-Path $env:TEMP "habibimodanalyzer"
             $counter = 0
@@ -507,7 +507,6 @@ if (-not (Test-Path $mods -PathType Container)) {
             }
         }
 
-        # 5. Output UI Rendering
         Write-Host "`r$(' ' * 80)`r" -NoNewline
         if ($verifiedMods.Count -gt 0) {
             Write-Host "{ Safe Database Verified Modules }" -ForegroundColor Green
@@ -533,6 +532,7 @@ if (-not (Test-Path $mods -PathType Container)) {
         }
     } else { Write-Host "[-] Archive targets absent inside tracking directory.`n" -ForegroundColor Gray }
 }
+
 # ----------------------------------------------------------------
 # ENGINE 5: NON-MICROSOFT EXECUTABLE DETECTION ARCHIVE
 # ----------------------------------------------------------------
