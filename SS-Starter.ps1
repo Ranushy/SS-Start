@@ -11,7 +11,7 @@ Write-Host " Compiled & Integrated into 1 Script by: ranush                    "
 Write-Host " Credits:                                                          " -ForegroundColor DarkGray
 Write-Host "   - ModAnalyzer: HadronCollision                                  " -ForegroundColor DarkGray
 Write-Host "   - Services + CommonDirectories: praiselily                      " -ForegroundColor DarkGray
-Write-Host "   - Engine 3 Doomsday Checker: Zedoon                             " -ForegroundColor DarkGray
+Write-Host "   - Doomsday Checker: Zedoon                                      " -ForegroundColor DarkGray
 Write-Host "   - Tools Downloader + The script I Integrated: JavaXYZZ          " -ForegroundColor DarkGray
 Write-Host "======================================================================" -ForegroundColor Cyan
 Write-Host
